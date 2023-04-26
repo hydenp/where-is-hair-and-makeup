@@ -1,24 +1,37 @@
-import logo from './logo.svg';
 import './App.css';
+import Location from "./components/Location";
+
+
+const data = [
+  {
+    location: 'traded to the jets',
+    day: '2023-04-23',
+    id: 1
+  },
+  {
+    location: 'some more to come for tomorrow',
+    day: '2023-04-23',
+    id: 1
+  },
+
+]
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App" style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
+    }}>
+      <p style={{
+        fontSize: 60
+      }}>Where is Hair and Makeup?</p>
+
+      <Location props={data[0]} />
+      <Location props={data[1]} />
+
     </div>
+
   );
 }
 
