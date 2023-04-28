@@ -1,13 +1,12 @@
 import json
-from datetime import datetime
-
 from dataclasses import dataclass
+from datetime import datetime
 
 import marshmallow.exceptions
 import sqlalchemy.exc
 from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields, post_load
 
 app = Flask(__name__)
@@ -20,37 +19,32 @@ ma = Marshmallow(app)
 
 @dataclass
 class Whereabouts(db.Model):
-    id: int
     location: str
     day: datetime.date
 
-    id = db.Column(db.Integer, primary_key=True, nullable=True)
     location = db.Column(db.String(500), nullable=False)
-    day = db.Column(db.Date, nullable=True, default=datetime.utcnow)
+    day = db.Column(db.Date, nullable=True, default=datetime.utcnow, primary_key=True)
 
 
 class WhereaboutsSchema(Schema):
-    id = fields.Integer(required=False)
     location = fields.String(required=True)
     day = fields.Date(required=True)
 
     @post_load()
-    def create_whereabout(self, data):
+    def create_whereabouts(self, data):
         return Whereabouts(**data)
 
 
 @app.route('/')
-def index():
+def read():
     return jsonify(Whereabouts.query.all())
 
 
-@app.route('/insert', methods=['POST'])
-def insert():
-
+@app.route('/', methods=['POST'])
+def create():
     request_params = json.loads(request.data)
-
     try:
-        obj = WhereaboutsSchema().load(request_params)
+        obj = Whereabouts(**request_params)
     except marshmallow.exceptions.ValidationError as e:
         return jsonify({
             'code': 200,
@@ -65,18 +59,67 @@ def insert():
 
     try:
         db.session.commit()
-    except sqlalchemy.exc.OperationalError as e:
-        print(str(e))
+    except sqlalchemy.exc.IntegrityError as e:
         return jsonify({
             'code': 200,
             'status': 'failure',
-            'reason': 'sql error',
+            'reason': 'primary_key_already_exists',
+            'error': str(e),
+        })
+    except sqlalchemy.exc.OperationalError as e:
+        return jsonify({
+            'code': 200,
+            'status': 'failure',
+            'reason': 'invalid_date_format',
             'error': str(e),
         })
     else:
         return jsonify({
             'code': 200,
             'status': 'success',
+            'body': Whereabouts.query.all()
+        })
+
+
+@app.route('/<day_id>', methods=['PATCH'])
+def update(day_id):
+    request_params = request.get_json()
+    record = Whereabouts.query.filter_by(day=day_id).first()
+    record.location = request_params['location']
+
+    try:
+        db.session.commit()
+    except BaseException as e:
+        return jsonify({
+            'code': 200,
+            'error': str(e),
+            'status': 'failure'
+        })
+    else:
+        return jsonify({
+            'code': 200,
+            'status': 'success',
+            'body': Whereabouts.query.all()
+        })
+
+
+@app.route('/<day_id>', methods=['DELETE'])
+def delete(day_id):
+    try:
+        Whereabouts.query.filter_by(day=day_id).delete()
+        db.session.commit()
+    except BaseException as e:
+        print('failure')
+        return jsonify({
+            'code': 200,
+            'status': 'failure',
+            'reason': str(e)
+        })
+    else:
+        return jsonify({
+            'code': 200,
+            'status': 'success',
+            'body': Whereabouts.query.all()
         })
 
 
