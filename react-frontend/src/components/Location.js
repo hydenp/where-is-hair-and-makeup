@@ -15,7 +15,7 @@ function Location({props}) {
       boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.25)"
     }}>
       <p style={{fontSize: 20}}>{props.location}</p>
-      <p>{props.day}</p>
+      <p>{props.day.substring(0, 11)}</p>
     </div>
   );
 }

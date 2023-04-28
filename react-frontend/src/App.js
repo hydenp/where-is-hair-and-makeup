@@ -1,5 +1,6 @@
 import './App.css';
 import Location from "./components/Location";
+import {useEffect, useState} from "react";
 
 
 const data = [
@@ -17,6 +18,21 @@ const data = [
 ]
 
 function App() {
+
+  const [whereabouts, setWhereabouts] = useState([{day: 'xxxx-xx-xx', location: 'loading'}])
+
+  useEffect(() => {
+    console.log("hi hyden")
+    fetch('http://127.0.0.1:5000/')
+      .then((response) =>
+        response.json()
+      )
+      .then((data) => {
+        console.log(data)
+        setWhereabouts(data)
+      })
+  }, [])
+
   return (
     <div className="App" style={{
       display: 'flex',
@@ -27,8 +43,9 @@ function App() {
         fontSize: 60
       }}>Where is Hair and Makeup?</p>
 
-      <Location props={data[0]} />
-      <Location props={data[1]} />
+      {whereabouts.map((item) => (
+        <Location key={item.day} props={item}/>
+      ))}
 
     </div>
 

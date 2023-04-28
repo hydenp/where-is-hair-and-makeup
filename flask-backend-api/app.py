@@ -5,11 +5,13 @@ from datetime import datetime
 import marshmallow.exceptions
 import sqlalchemy.exc
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields, post_load
 
 app = Flask(__name__)
+CORS(app)
 
 # database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/testing'
@@ -35,9 +37,13 @@ class WhereaboutsSchema(Schema):
         return Whereabouts(**data)
 
 
+def query_all():
+    return Whereabouts.query.order_by(Whereabouts.day.desc()).all()
+
+
 @app.route('/')
 def read():
-    return jsonify(Whereabouts.query.all())
+    return jsonify(query_all())
 
 
 @app.route('/', methods=['POST'])
@@ -77,7 +83,7 @@ def create():
         return jsonify({
             'code': 200,
             'status': 'success',
-            'body': Whereabouts.query.all()
+            'body': query_all()
         })
 
 
@@ -99,7 +105,7 @@ def update(day_id):
         return jsonify({
             'code': 200,
             'status': 'success',
-            'body': Whereabouts.query.all()
+            'body': query_all()
         })
 
 
@@ -119,7 +125,7 @@ def delete(day_id):
         return jsonify({
             'code': 200,
             'status': 'success',
-            'body': Whereabouts.query.all()
+            'body': query_all()
         })
 
 
