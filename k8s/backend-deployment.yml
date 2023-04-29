@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-backend
+spec:
+  selector:
+    matchLabels:
+      app: flask-backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: flask-backend
+    spec:
+      containers:
+      - name: flask-api
+        image: registry.digitalocean.com/wiham/flask-api-dev:latest
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "128Mi"
+        ports:
+        - containerPort: 5000

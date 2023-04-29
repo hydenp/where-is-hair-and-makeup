@@ -23,13 +23,13 @@ function App() {
 
   useEffect(() => {
     console.log("hi hyden")
-    fetch('http://127.0.0.1:5000/')
+    fetch('http://127.0.0.1:5001/')
       .then((response) =>
         response.json()
       )
       .then((data) => {
         console.log(data)
-        setWhereabouts(data)
+        setWhereabouts(data.locations)
       })
   }, [])
 
