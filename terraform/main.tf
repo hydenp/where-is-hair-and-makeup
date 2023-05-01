@@ -76,7 +76,17 @@ resource "digitalocean_kubernetes_cluster" "wiham-cluster" {
 
   node_pool {
     name       = "wiham-worker-pool"
-    size       = "s-1vcpu-2gb"
-    node_count = 1
+    size       = "s-2vcpu-2gb"
+    auto_scale = true
+    min_nodes = 2
+    max_nodes = 3
   }
+}
+
+# Domain things
+variable nginx-lb-ip {}
+
+resource "digitalocean_domain" "whereishairandmakeup-com" {
+  name       = "whereishairandmakeup.com"
+  ip_address = var.nginx-lb-ip
 }

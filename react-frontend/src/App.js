@@ -3,33 +3,36 @@ import Location from "./components/Location";
 import {useEffect, useState} from "react";
 
 
-const data = [
-  {
-    location: 'traded to the jets',
-    day: '2023-04-23',
-    id: 1
-  },
-  {
-    location: 'some more to come for tomorrow',
-    day: '2023-04-23',
-    id: 1
-  },
-
-]
+// const data = [
+//   {
+//     location: 'traded to the jets',
+//     day: '2023-04-23',
+//     id: 1
+//   },
+//   {
+//     location: 'some more to come for tomorrow',
+//     day: '2023-04-23',
+//     id: 1
+//   },
+// ]
 
 function App() {
 
   const [whereabouts, setWhereabouts] = useState([{day: 'xxxx-xx-xx', location: 'loading'}])
 
   useEffect(() => {
-    console.log("hi hyden")
-    fetch('http://127.0.0.1:5001/')
+
+    // fetch(`http://localhost/api`)
+    fetch(`http://${window.API_URI}/api`)
       .then((response) =>
         response.json()
       )
       .then((data) => {
         console.log(data)
         setWhereabouts(data.locations)
+      })
+      .catch(err => {
+        console.log(err)
       })
   }, [])
 

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-frontend
+spec:
+  selector:
+    matchLabels:
+      app: react-frontend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: react-frontend
+    spec:
+      containers:
+      - name: react-frontend
+        image: registry.digitalocean.com/wiham/react-frontend-dev:latest
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "128Mi"
+        ports:
+        - containerPort: 80
+        env:
+          - name: "API_URI"
+            valueFrom:
+              secretKeyRef:
+                key: cluster_lb_ip
+                name: wiham-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-frontend-cluster-ip
+spec:
+  type: ClusterIP
+  selector:
+    app: react-frontend
+  ports:
+  - protocol: TCP
+    name: http
+    targetPort: 80
+    port: 80

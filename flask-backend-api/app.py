@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -14,7 +15,11 @@ app = Flask(__name__)
 CORS(app)
 
 # database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/testing'
+DB_CONN_STRING = os.getenv("db_conn_string").strip('\n')
+app.config['SQLALCHEMY_DATABASE_URI'] = DB_CONN_STRING
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/testing'
+
+
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
@@ -41,23 +46,25 @@ def query_all():
     return Whereabouts.query.order_by(Whereabouts.day.desc()).all()
 
 
-@app.route('/')
+@app.route('/api')
 def read():
-    return jsonify(query_all())
+    return jsonify({
+        'status': 'success',
+        'locations': query_all()
+    })
 
 
-@app.route('/', methods=['POST'])
+@app.route('/api', methods=['POST'])
 def create():
     request_params = json.loads(request.data)
     try:
         obj = Whereabouts(**request_params)
     except marshmallow.exceptions.ValidationError as e:
         return jsonify({
-            'code': 200,
             'status': 'failure',
             'reason': 'request validation failure',
             'error': str(e),
-        })
+        }), 500
 
     db.session.add(
         obj
@@ -67,66 +74,57 @@ def create():
         db.session.commit()
     except sqlalchemy.exc.IntegrityError as e:
         return jsonify({
-            'code': 200,
             'status': 'failure',
             'reason': 'primary_key_already_exists',
             'error': str(e),
-        })
+        }), 500
     except sqlalchemy.exc.OperationalError as e:
         return jsonify({
-            'code': 200,
             'status': 'failure',
             'reason': 'invalid_date_format',
             'error': str(e),
-        })
+        }), 500
     else:
         return jsonify({
-            'code': 200,
             'status': 'success',
-            'body': query_all()
-        })
+            'locations': query_all()
+        }), 200
 
 
-@app.route('/<day_id>', methods=['PATCH'])
+@app.route('/api/<day_id>', methods=['PATCH'])
 def update(day_id):
     request_params = request.get_json()
     record = Whereabouts.query.filter_by(day=day_id).first()
     record.location = request_params['location']
-
     try:
         db.session.commit()
     except BaseException as e:
         return jsonify({
-            'code': 200,
             'error': str(e),
             'status': 'failure'
-        })
+        }), 500
     else:
         return jsonify({
-            'code': 200,
             'status': 'success',
             'body': query_all()
-        })
+        }), 200
 
 
-@app.route('/<day_id>', methods=['DELETE'])
+@app.route('/api/<day_id>', methods=['DELETE'])
 def delete(day_id):
     try:
         Whereabouts.query.filter_by(day=day_id).delete()
         db.session.commit()
     except BaseException as e:
-        print('failure')
         return jsonify({
-            'code': 200,
             'status': 'failure',
             'reason': str(e)
-        })
+        }), 500
     else:
         return jsonify({
-            'code': 200,
             'status': 'success',
             'body': query_all()
-        })
+        }), 200
 
 
 if __name__ == '__main__':
