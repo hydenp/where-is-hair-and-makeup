@@ -28,9 +28,9 @@
       window.API_URI = "REPLACE_API_URI";
 
       // for local development only - this wont affect production builds
-      // if (window.API_URI.includes("API_URI")) {
-      //   window.API_URI = "http://localhost:5000/api";
-      // }
+      if (window.API_URI.includes("API_URI")) {
+        window.API_URI = "127.0.0.1:5000";
+      }
     </script>
     <title>Where Is Hair and Makeup</title>
 </head>

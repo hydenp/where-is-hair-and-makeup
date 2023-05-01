@@ -15,9 +15,10 @@ app = Flask(__name__)
 CORS(app)
 
 # database
-DB_CONN_STRING = os.getenv("db_conn_string").strip('\n')
-app.config['SQLALCHEMY_DATABASE_URI'] = DB_CONN_STRING
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/testing'
+if os.getenv('ENVIRONMENT') == 'prod':
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("db_conn_string").strip('\n')
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/testing'
 
 
 db = SQLAlchemy(app)
@@ -63,6 +64,7 @@ def create():
         return jsonify({
             'status': 'failure',
             'reason': 'request validation failure',
+            'errorMessage': 'The request was malformed',
             'error': str(e),
         }), 500
 
@@ -76,12 +78,14 @@ def create():
         return jsonify({
             'status': 'failure',
             'reason': 'primary_key_already_exists',
+            'errorMessage': 'Entry for this date already exists. Please select a different date.',
             'error': str(e),
         }), 500
     except sqlalchemy.exc.OperationalError as e:
         return jsonify({
             'status': 'failure',
             'reason': 'invalid_date_format',
+            'errorMessage': 'An invalid date format was provided',
             'error': str(e),
         }), 500
     else:
@@ -94,6 +98,7 @@ def create():
 @app.route('/api/<day_id>', methods=['PATCH'])
 def update(day_id):
     request_params = request.get_json()
+    print(request_params)
     record = Whereabouts.query.filter_by(day=day_id).first()
     record.location = request_params['location']
     try:
@@ -106,7 +111,7 @@ def update(day_id):
     else:
         return jsonify({
             'status': 'success',
-            'body': query_all()
+            'locations': query_all()
         }), 200
 
 
@@ -118,12 +123,13 @@ def delete(day_id):
     except BaseException as e:
         return jsonify({
             'status': 'failure',
-            'reason': str(e)
+            'reason': str(e),
+            'errorMessage': str(e)
         }), 500
     else:
         return jsonify({
             'status': 'success',
-            'body': query_all()
+            'locations': query_all()
         }), 200
 
 
