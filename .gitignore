@@ -3,3 +3,4 @@ __pycache__
 # terraform state things
 .terraform
 *.hcl
+k8s/secret.yml
