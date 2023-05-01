@@ -17,7 +17,7 @@ spec:
         image: registry.digitalocean.com/wiham/react-frontend-dev:latest
         resources:
           limits:
-            cpu: "50m"
+            cpu: "200m"
             memory: "128Mi"
         ports:
         - containerPort: 80
