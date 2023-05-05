@@ -7,7 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 
 function App() {
-
+  const [windowSize, setWindowSize] = useState([window.innerWidth, window.innerHeight]);
   const [whereabouts, setWhereabouts] = useState([{day: 'xxxx-xx-xx', location: 'loading'}])
   const [date, setDate] = useState(new Date())
   const [newLocation, setNewLocation] = useState("")
@@ -60,6 +60,19 @@ function App() {
   }
 
   useEffect(() => {
+    const handleWindowResize = () => {
+      setWindowSize([window.innerWidth, window.innerHeight]);
+    };
+
+    window.addEventListener('resize', handleWindowResize);
+
+    return () => {
+      window.removeEventListener('resize', handleWindowResize);
+    };
+  }, [])
+
+
+  useEffect(() => {
     fetch(`http://${window.API_URI}/api`)
       .then((response) =>
         response.json()
@@ -82,13 +95,14 @@ function App() {
       <p
         style={{
           fontSize: 60,
-          cursor: "pointer"
+          cursor: "pointer",
+          margin: windowSize[0] < 800 ? 20 : 80
         }}
         onClick={() => setShowButtons(!showButtons)}
       >Where is Hair and Makeup?</p>
 
       <div style={{
-        width: '50%',
+        width: windowSize[0] < 800 ? '80%' : '50%',
         borderRadius: 20,
         display: showButtons ? 'flex' : 'none',
         flexDirection: 'column',
@@ -118,9 +132,10 @@ function App() {
                 marginBottom: 10
               }}
             >
-              <input
+              <textarea
                 style={{
-                  width: '90%',
+                  width: '100%',
+                  height: 40,
                   marginRight: 5,
                 }}
                 placeholder={'Enter a location and select a date to the right'}
@@ -128,10 +143,7 @@ function App() {
                 onChange={(e) => setNewLocation(e.target.value)}
               />
               <div>
-                <DatePicker selected={date} onChange={(date) => setDate(date)} style={{
-                  width: '5%'
-                }
-                }/>
+                <DatePicker selected={date} onChange={(date) => setDate(date)}/>
               </div>
             </div>
             {error && <p>request failed: {error}</p>}
@@ -167,6 +179,7 @@ function App() {
         <Location
           key={item.day}
           props={item}
+          windowWidth={windowSize[0]}
           showButtons={showButtons}
           handleSetWhereabouts={handleSetWhereabouts}
           handleSetShowForm={handleSetShowForm}

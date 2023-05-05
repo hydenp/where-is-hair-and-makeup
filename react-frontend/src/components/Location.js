@@ -1,13 +1,13 @@
 import React, {useState} from 'react';
 
 
-function Location({props, showButtons, handleSetWhereabouts, handleSetShowForm, parseDate}) {
+function Location({props, windowWidth, showButtons, handleSetWhereabouts, handleSetShowForm, parseDate}) {
 
   const [location, setLocation] = useState(props.location)
   const [editing, setEditing] = useState(false)
 
   const deleteItem = () => {
-    if(window.confirm('Are you sure you want to delete this item?')) {
+    if (window.confirm('Are you sure you want to delete this item?')) {
       fetch(
         `http://${window.API_URI}/api/${parseDate(props.day)}`, {
           method: 'DELETE',
@@ -25,7 +25,7 @@ function Location({props, showButtons, handleSetWhereabouts, handleSetShowForm, 
 
   const updateItem = () => {
 
-    if(props.location === location) {
+    if (props.location === location) {
       setEditing(false)
       return
     }
@@ -52,7 +52,7 @@ function Location({props, showButtons, handleSetWhereabouts, handleSetShowForm, 
 
   return (
     <div style={{
-      width: '50%',
+      width: windowWidth < 800 ? '80%' : '50%',
       borderRadius: 20,
       display: 'flex',
       flexDirection: 'column',
@@ -69,14 +69,19 @@ function Location({props, showButtons, handleSetWhereabouts, handleSetShowForm, 
         alignItems: 'center',
       }}>
         {editing ?
-          <input
+          <textarea
             style={{
-              width: '70%'
+              marginBottom: 10,
+              width: '80%',
+              height: 40
             }}
             value={String(location)}
             onChange={(e) => setLocation(e.target.value)}
           /> :
-          <p style={{fontSize: 20}}>{props.location}</p>
+          <p style={{
+            fontSize: 20,
+            textAlign: 'left'
+          }}>{props.location}</p>
         }
         <p>{props.day.substring(0, 11)}</p>
       </div>
