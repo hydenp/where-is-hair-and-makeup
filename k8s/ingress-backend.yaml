@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nginx-ingress-frontend
+  name: nginx-ingress-backend
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
@@ -9,10 +9,10 @@ spec:
   rules:
     - http:
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
             backend:
               service:
-                name: react-frontend-cluster-ip
+                name: flask-backend-cluster-ip
                 port:
                   number: 80

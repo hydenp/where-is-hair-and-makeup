@@ -16,7 +16,7 @@ CORS(app)
 
 # database
 if os.getenv('ENVIRONMENT') == 'prod':
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("db_conn_string").strip('\n')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("secret-vals.yaml").strip('\n')
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/testing'
 

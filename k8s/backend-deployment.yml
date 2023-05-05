@@ -20,7 +20,7 @@ spec:
         env:
           - name: ENVIRONMENT
             value: prod
-          - name: db_conn_string
+          - name: secret-vals.yaml
             valueFrom:
               secretKeyRef:
                 key: db_conn_string
